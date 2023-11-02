@@ -589,7 +589,7 @@ public class AddS21 {
                 scenario.getNetwork().getNodes().get(Id.createNodeId(fromNodeId)),
                 scenario.getNetwork().getNodes().get(Id.createNodeId(toNodeId)));
         link.setLength(length);
-        link.getFreespeed(speed);
+        link.setFreespeed(20.0d);
         link.setCapacity(100000.0);
         link.setAllowedModes(Set.of("S21"));
         scenario.getNetwork().addLink(link);
