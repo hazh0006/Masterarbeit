@@ -1,0 +1,613 @@
+package org.matsim.prepare.transit.schedule;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup;
+import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
+import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.pt.transitSchedule.api.*;
+import org.matsim.vehicles.MatsimVehicleWriter;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleWriterV1;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+
+
+public class AddS21 {
+    public static void main(String[] args) {
+        Config config = ConfigUtils.loadConfig("/Users/hw/Desktop/Masterarbeit/scenarios/berlin-v5.5-1pct/input/berlin-v5.5-1pct.config.xml");
+        config.qsim().setFlowCapFactor(10000.0d);
+        config.qsim().setStorageCapFactor(10000.0d);
+        config.plans().setInputFile(null);
+        Scenario scenario = ScenarioUtils.loadScenario(config);
+
+        addS21Route1(scenario);
+        addS21Route2(scenario);
+        addS21Route3(scenario);
+        addS21Route4(scenario);
+
+        NetworkUtils.writeNetwork(scenario.getNetwork(), "berlin-v5.5-1pct.network_S21.xml.gz");
+        (new TransitScheduleWriter(scenario.getTransitSchedule())).writeFile("berlin-v5.5-1pct.transitSchedule_S21.xml");
+        (new MatsimVehicleWriter(scenario.getTransitVehicles())).writeFile("berlin-v5.5-1pct.transitVehicles_S21.xml");
+
+        // Test
+        Controler controler = new Controler(scenario);
+        controler.getConfig().controler().setLastIteration(1);
+        controler.getConfig().vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.ignore);
+        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        controler.run();
+    }
+
+
+    private static void addS21Route1(Scenario scenario) {
+        addLinkAndStop(scenario, "pt_060092201131", "pt_060092201131", 1d, 5d);
+        addLinkAndStop(scenario, "pt_060092201131", "pt_130000089301", 2010d, 16.75d);
+        addLinkAndStop(scenario, "pt_130000089301", "pt_060094101122", 1540d, 12.9d);
+        addLinkAndStop(scenario, "pt_060094101122", "pt_060096101111", 1460d, 12.2d);
+        addLinkAndStop(scenario, "pt_060096101111", "pt_060084101101", 2580d, 14.4d);
+        addLinkAndStop(scenario, "pt_060084101101", "pt_060085201683", 1610d, 13.5d);
+        addLinkAndStop(scenario, "pt_060085201683", "pt_060130003653", 996.3d, 16.7d);
+        addLinkAndStop(scenario, "pt_060130003653", "pt_060110011612", 1260d, 21d);
+        addLinkAndStop(scenario, "pt_060110011612", "pt_060007102721", 826.3d, 13.8d);
+        addLinkAndStop(scenario, "pt_060007102721", "pt_060009104841", 1660d, 13.9d);
+        addLinkAndStop(scenario, "pt_060009104841" , "pt_070101004117",962d , 16.1d );
+        addLinkAndStop(scenario, "pt_070101004117" , "pt_060003201213",1430d , 12d );
+        addLinkAndStop(scenario, "pt_060003201213" , "pt_060100020451",1840d , 10.3d);
+        addLinkAndStop(scenario, "pt_060100020451" , "pt_070201012801",1140d, 19d );
+        addLinkAndStop(scenario, "pt_070201012801" , "pt_060057102801",921d ,15.4d );
+        addLinkAndStop(scenario, "pt_060057102801" , "pt_060057104811",848.4d , 14.2d );
+        addLinkAndStop(scenario, "pt_060057104811" ,"pt_070101002006",959d , 16d );
+        addLinkAndStop(scenario, "pt_070101002006" , "pt_060060101831",1280d , 10.7d );
+        addLinkAndStop(scenario, "pt_060060101831" ,"pt_060063101841",907.4d ,7.6d  );
+        addLinkAndStop(scenario, "pt_060063101841" ,"pt_060062202842",1120d , 9.4d );
+        addLinkAndStop(scenario, "pt_060062202842" ,"pt_070101002891",1340d , 11.2d );
+        addLinkAndStop(scenario, "pt_070101002891" ,"pt_060066101852",1040d , 8.7d );
+        addLinkAndStop(scenario, "pt_060066101852" ,"pt_060049202851",1570d , 13.1d );
+        addLinkAndStop(scenario, "pt_060049202851" ,"pt_060049201861",1170d , 9.8d );
+
+
+
+
+        TransitLine transitLine = scenario.getTransitSchedule().getFactory().createTransitLine(Id.create("S21way1-1", TransitLine.class));
+        NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(
+                        getLinkIdFromToNodes("pt_060092201131", "pt_060092201131"),
+                List.of(getLinkIdFromToNodes("pt_060092201131", "pt_130000089301"),
+                        getLinkIdFromToNodes("pt_130000089301", "pt_060094101122"),
+                        getLinkIdFromToNodes("pt_060094101122", "pt_060096101111"),
+                        getLinkIdFromToNodes("pt_060096101111", "pt_060084101101"),
+                        getLinkIdFromToNodes("pt_060084101101", "pt_060085201683"),
+                        getLinkIdFromToNodes("pt_060085201683", "pt_060130003653"),
+                        getLinkIdFromToNodes("pt_060130003653", "pt_060110011612"),
+                        getLinkIdFromToNodes("pt_060110011612", "pt_060007102721"),
+                        getLinkIdFromToNodes("pt_060007102721", "pt_060009104841"),
+                        getLinkIdFromToNodes("pt_060009104841", "pt_070101004117"),
+                        getLinkIdFromToNodes("pt_070101004117", "pt_060003201213"),
+                        getLinkIdFromToNodes("pt_060003201213", "pt_060100020451"),
+                        getLinkIdFromToNodes("pt_060100020451", "pt_070201012801"),
+                        getLinkIdFromToNodes("pt_070201012801", "pt_060057102801"),
+                        getLinkIdFromToNodes("pt_060057102801", "pt_060057104811"),
+                        getLinkIdFromToNodes("pt_060057104811", "pt_070101002006"),
+                        getLinkIdFromToNodes("pt_070101002006", "pt_060060101831"),
+                        getLinkIdFromToNodes("pt_060060101831", "pt_060063101841"),
+                        getLinkIdFromToNodes("pt_060063101841", "pt_060062202842"),
+                        getLinkIdFromToNodes("pt_060062202842", "pt_070101002891"),
+                        getLinkIdFromToNodes("pt_070101002891", "pt_060066101852"),
+                        getLinkIdFromToNodes("pt_060066101852", "pt_060049202851")),
+                        getLinkIdFromToNodes("pt_060049202851", "pt_060049201861"));
+
+
+
+
+        List<TransitRouteStop> stops = new ArrayList<>();
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060092201131", "pt_060092201131"),
+                TransitStopFacility.class), 0.0d, 0.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060092201131", "pt_130000089301"),
+                TransitStopFacility.class), 120.0d, 150.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_130000089301", "pt_060094101122"),
+                TransitStopFacility.class), 270.0d, 300.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060094101122", "pt_060096101111"),
+                TransitStopFacility.class), 420.0d, 450.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060096101111", "pt_060084101101"),
+                TransitStopFacility.class), 630.0d, 660.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060084101101", "pt_060085201683"),
+                TransitStopFacility.class), 780.0d, 810.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060085201683", "pt_060130003653"),
+                TransitStopFacility.class), 870.0d, 900.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060130003653", "pt_060110011612"),
+                TransitStopFacility.class), 960.0d, 990d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060110011612", "pt_060007102721"),
+                TransitStopFacility.class), 1050.0d, 1080.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060007102721", "pt_060009104841"),
+                TransitStopFacility.class), 1200.0d, 1230.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060009104841", "pt_070101004117"),
+                TransitStopFacility.class), 1290.0d, 1320.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101004117", "pt_060003201213"),
+                TransitStopFacility.class), 1440.0d, 1470.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060003201213", "pt_060100020451"),
+                TransitStopFacility.class), 1650.0d, 1680.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060100020451", "pt_070201012801"),
+                TransitStopFacility.class), 1740.0d, 1770.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070201012801", "pt_060057102801"),
+                TransitStopFacility.class), 1830.0d, 1860.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060057102801", "pt_060057104811"),
+                TransitStopFacility.class), 1920.0d, 1950.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060057104811", "pt_070101002006"),
+                TransitStopFacility.class), 2010.0d, 2040.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101002006", "pt_060060101831"),
+                TransitStopFacility.class), 2160.0d, 2190.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060060101831", "pt_060063101841"),
+                TransitStopFacility.class), 2310.0d, 2340.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060063101841", "pt_060062202842"),
+                TransitStopFacility.class), 2460.0d, 2490.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060062202842", "pt_070101002891"),
+                TransitStopFacility.class), 2610.0d, 2640.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101002891", "pt_060066101852"),
+                TransitStopFacility.class), 2760.0d, 2790.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060066101852", "pt_060049202851"),
+                TransitStopFacility.class), 2910.0d, 2940.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060049202851", "pt_060049201861"),
+                TransitStopFacility.class), 3060.0d, 3090.0d));
+        stops.forEach(stop -> stop.setAwaitDepartureTime(true));
+//分为两段 S21-1 和 S21-2 两个方向
+        TransitRoute transitRoute = scenario.getTransitSchedule().getFactory().createTransitRoute(
+                Id.create("S21", TransitRoute.class),
+                networkRoute,
+                stops,
+                "");
+
+        for (int i = 26; i < 150; i++) {
+            Departure departure = scenario.getTransitSchedule().getFactory().createDeparture(Id.create("pt_S21---" + i, Departure.class),i*600);
+            scenario.getTransitVehicles().addVehicle(scenario.getTransitVehicles().getFactory().createVehicle(
+                    Id.createVehicleId("pt_S21---" + i),
+                    scenario.getTransitVehicles().getVehicleTypes().get(Id.create("S-Bahn_veh_type", VehicleType.class))
+            ));
+            departure.setVehicleId(Id.createVehicleId("pt_S21---" + i));
+            transitRoute.addDeparture(departure);
+        }
+
+        for (int i = 170; i < 180; i++) {
+            Departure departure = scenario.getTransitSchedule().getFactory().createDeparture(Id.create("pt_S21---" + i, Departure.class),i*600);
+            scenario.getTransitVehicles().addVehicle(scenario.getTransitVehicles().getFactory().createVehicle(
+                    Id.createVehicleId("pt_S21---" + i),
+                    scenario.getTransitVehicles().getVehicleTypes().get(Id.create("S-Bahn_veh_type", VehicleType.class))
+            ));
+            departure.setVehicleId(Id.createVehicleId("pt_S21---" + i));
+            transitRoute.addDeparture(departure);
+        }
+
+        transitLine.addRoute(transitRoute);
+        scenario.getTransitSchedule().addTransitLine(transitLine);
+    }
+
+    private static void addS21Route2(Scenario scenario) {
+        addLinkAndStop(scenario, "pt_060049201862", "pt_060049201862", 1d, 5d);
+        addLinkAndStop(scenario, "pt_060049201862", "pt_060049202852", 1170d , 9.8d);
+        addLinkAndStop(scenario, "pt_060049202852", "pt_060066101851", 1570d , 13.1d );
+        addLinkAndStop(scenario, "pt_060066101851", "pt_070101002888", 1040d , 8.7d );
+        addLinkAndStop(scenario, "pt_070101002888", "pt_060062202841", 1340d , 11.2d);
+        addLinkAndStop(scenario, "pt_060062202841", "pt_060063101842", 1120d , 9.4d);
+        addLinkAndStop(scenario, "pt_060063101842", "pt_060060101832", 907.4d ,7.6d);
+        addLinkAndStop(scenario, "pt_060060101832", "pt_060054100601", 1280d , 10.7d);
+        addLinkAndStop(scenario, "pt_060054100601", "pt_060057104812", 959d , 16d);
+        addLinkAndStop(scenario, "pt_060057104812", "pt_060057102802", 848.4d , 14.2d);
+        addLinkAndStop(scenario, "pt_060057102802" , "pt_070201012802",921d ,15.4d );
+        addLinkAndStop(scenario, "pt_070201012802" , "pt_060100020452",1140d, 19d  );
+        addLinkAndStop(scenario, "pt_060100020452" , "pt_060003201214",1840d , 10.3d);
+        addLinkAndStop(scenario, "pt_060003201214" , "pt_070101004117",1430d , 12d);
+        addLinkAndStop(scenario, "pt_070101004117" , "pt_060009104842",962d , 16.1d);
+        addLinkAndStop(scenario, "pt_060009104842" , "pt_060007102722",1660d, 13.9d);
+        addLinkAndStop(scenario, "pt_060007102722" ,"pt_060110011611",826.3d, 13.8d);
+        addLinkAndStop(scenario, "pt_060110011611" , "pt_060130003654",1260d, 21d);
+        addLinkAndStop(scenario, "pt_060130003654" ,"pt_060085201684",996.3d, 16.7d);
+        addLinkAndStop(scenario, "pt_060085201684" ,"pt_060084101102",1610d, 13.5d);
+        addLinkAndStop(scenario, "pt_060084101102" ,"pt_060096101112",2580d, 14.4d);
+        addLinkAndStop(scenario, "pt_060096101112" ,"pt_060094101121",1460d, 12.2d);
+        addLinkAndStop(scenario, "pt_060094101121" ,"pt_130000089302",1540d, 12.9d);
+        addLinkAndStop(scenario, "pt_130000089302" ,"pt_060092201132",2010d, 16.75d);
+
+
+
+
+        TransitLine transitLine = scenario.getTransitSchedule().getFactory().createTransitLine(Id.create("S21way1-2", TransitLine.class));
+        NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(
+                getLinkIdFromToNodes("pt_060049201862", "pt_060049201862"),
+                List.of(getLinkIdFromToNodes("pt_060049201862", "pt_060049202852"),
+                        getLinkIdFromToNodes("pt_060049202852", "pt_060066101851"),
+                        getLinkIdFromToNodes("pt_060066101851", "pt_070101002888"),
+                        getLinkIdFromToNodes("pt_070101002888", "pt_060062202841"),
+                        getLinkIdFromToNodes("pt_060062202841", "pt_060063101842"),
+                        getLinkIdFromToNodes("pt_060063101842", "pt_060060101832"),
+                        getLinkIdFromToNodes("pt_060060101832", "pt_060054100601"),
+                        getLinkIdFromToNodes("pt_060054100601", "pt_060057104812"),
+                        getLinkIdFromToNodes("pt_060057104812", "pt_060057102802"),
+                        getLinkIdFromToNodes("pt_060057102802" , "pt_070201012802"),
+                        getLinkIdFromToNodes("pt_070201012802" , "pt_060100020452"),
+                        getLinkIdFromToNodes("pt_060100020452" , "pt_060003201214"),
+                        getLinkIdFromToNodes("pt_060003201214" , "pt_070101004117"),
+                        getLinkIdFromToNodes("pt_070101004117" , "pt_060009104842"),
+                        getLinkIdFromToNodes("pt_060009104842" , "pt_060007102722"),
+                        getLinkIdFromToNodes("pt_060007102722" ,"pt_060110011611"),
+                        getLinkIdFromToNodes("pt_060110011611" , "pt_060130003654"),
+                        getLinkIdFromToNodes("pt_060130003654" ,"pt_060085201684"),
+                        getLinkIdFromToNodes("pt_060085201684" ,"pt_060084101102"),
+                        getLinkIdFromToNodes("pt_060084101102" ,"pt_060096101112"),
+                        getLinkIdFromToNodes("pt_060096101112" ,"pt_060094101121"),
+                        getLinkIdFromToNodes("pt_060094101121" ,"pt_130000089302")),
+                        getLinkIdFromToNodes("pt_130000089302" ,"pt_060092201132"));
+
+
+
+
+
+        List<TransitRouteStop> stops = new ArrayList<>();
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060049201862", "pt_060049201862"),
+                TransitStopFacility.class), 0.0d, 0.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060049201862", "pt_060049202852"),
+                TransitStopFacility.class), 120.0d, 150.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060049202852", "pt_060066101851"),
+                TransitStopFacility.class), 270.0d, 300.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060066101851", "pt_070101002888"),
+                TransitStopFacility.class), 420.0d, 450.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101002888", "pt_060062202841"),
+                TransitStopFacility.class), 570.0d, 600.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060062202841", "pt_060063101842"),
+                TransitStopFacility.class), 720.0d, 750.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060063101842", "pt_060060101832"),
+                TransitStopFacility.class), 870.0d, 900.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060060101832", "pt_060054100601"),
+                TransitStopFacility.class), 1020.0d, 1050.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060054100601", "pt_060057104812"),
+                TransitStopFacility.class), 1110.0d, 1140.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060057104812", "pt_060057102802"),
+                TransitStopFacility.class), 1200.0d, 1230.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060057102802" , "pt_070201012802"),
+                TransitStopFacility.class), 1290.0d, 1320.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070201012802" , "pt_060100020452"),
+                TransitStopFacility.class), 1380.0d, 1410.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060100020452" , "pt_060003201214"),
+                TransitStopFacility.class), 1590.0d, 1620.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060003201214" , "pt_070101004117"),
+                TransitStopFacility.class), 1740.0d, 1770.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101004117" , "pt_060009104842"),
+                TransitStopFacility.class), 1830.0d, 1860.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060009104842" , "pt_060007102722"),
+                TransitStopFacility.class), 1980.0d, 2010.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060007102722" ,"pt_060110011611"),
+                TransitStopFacility.class), 2070.0d, 2100.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060110011611" , "pt_060130003654"),
+                TransitStopFacility.class), 2160.0d, 2190.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060130003654" ,"pt_060085201684"),
+                TransitStopFacility.class), 2250.0d, 2280.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060085201684" ,"pt_060084101102"),
+                TransitStopFacility.class), 2400.0d, 2430.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060084101102" ,"pt_060096101112"),
+                TransitStopFacility.class), 2610.0d, 2640.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060096101112" ,"pt_060094101121"),
+                TransitStopFacility.class), 2760.0d, 2790.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060094101121" ,"pt_130000089302"),
+                TransitStopFacility.class), 2910.0d, 2940.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_130000089302" ,"pt_060092201132"),
+                TransitStopFacility.class), 3060.0d, 3090.0d));
+        stops.forEach(stop -> stop.setAwaitDepartureTime(true));
+//分为两段 S21-1 和 S21-2 两个方向
+        TransitRoute transitRoute = scenario.getTransitSchedule().getFactory().createTransitRoute(
+                Id.create("S21", TransitRoute.class),
+                networkRoute,
+                stops,
+                "");
+
+        for (int i = 26; i < 152; i++) {
+            Departure departure = scenario.getTransitSchedule().getFactory().createDeparture(Id.create("pt_S21-1--" + i, Departure.class),i*600);
+            scenario.getTransitVehicles().addVehicle(scenario.getTransitVehicles().getFactory().createVehicle(
+                    Id.createVehicleId("pt_S21-1--" + i),
+                    scenario.getTransitVehicles().getVehicleTypes().get(Id.create("S-Bahn_veh_type", VehicleType.class))
+            ));
+            departure.setVehicleId(Id.createVehicleId("pt_S21-1--" + i));
+            transitRoute.addDeparture(departure);
+        }
+
+        for (int i = 170; i < 180; i++) {
+            Departure departure = scenario.getTransitSchedule().getFactory().createDeparture(Id.create("pt_S21-1--" + i, Departure.class),i*600);
+            scenario.getTransitVehicles().addVehicle(scenario.getTransitVehicles().getFactory().createVehicle(
+                    Id.createVehicleId("pt_S21-1--" + i),
+                    scenario.getTransitVehicles().getVehicleTypes().get(Id.create("S-Bahn_veh_type", VehicleType.class))
+            ));
+            departure.setVehicleId(Id.createVehicleId("pt_S21-1--" + i));
+            transitRoute.addDeparture(departure);
+        }
+
+        transitLine.addRoute(transitRoute);
+        scenario.getTransitSchedule().addTransitLine(transitLine);
+    }
+
+    private static void addS21Route3(Scenario scenario) {
+
+        addLinkAndStop(scenario, "pt_060020201956", "pt_060020201956", 1d,5d);
+        addLinkAndStop(scenario, "pt_060020201956", "pt_060020202811", 1950d,16.25d);
+        addLinkAndStop(scenario, "pt_060020202811", "pt_060001201832", 1050d,17.5d);
+        addLinkAndStop(scenario, "pt_060001201832", "pt_070101004117", 860d,14.4d);
+        addLinkAndStop(scenario, "pt_070101004117", "pt_060003201214", 1430d,12d);
+        addLinkAndStop(scenario, "pt_060003201214", "pt_060100020452", 1840d,10.3d);
+        addLinkAndStop(scenario, "pt_060100020452", "pt_070201012802", 1140d,19d);
+        addLinkAndStop(scenario, "pt_070201012802", "pt_060057102802",921d,15.4d);
+        addLinkAndStop(scenario, "pt_060057102802", "pt_060057104812",848.4d,14.2d);
+        addLinkAndStop(scenario, "pt_060057104812", "pt_060058100531",959d ,8d);
+        addLinkAndStop(scenario, "pt_060058100531", "pt_060068201512",1400d ,11.7d);
+        addLinkAndStop(scenario, "pt_060068201512", "pt_060079221471",3160d ,17.6d);
+        addLinkAndStop(scenario, "pt_060079221471", "pt_060078201461",778.6d ,13d);
+        addLinkAndStop(scenario, "pt_060078201461", "pt_060077155441",1700d ,14.2d);
+        addLinkAndStop(scenario, "pt_060077155441", "pt_060191001005",1520d ,12.7d);
+        addLinkAndStop(scenario, "pt_060191001005", "pt_060192001005",1890d ,10.5d);
+        addLinkAndStop(scenario, "pt_060192001005", "pt_060192002001",1960d ,10.9d);
+        addLinkAndStop(scenario, "pt_060192002001", "pt_060180003001",1680d ,14d);
+
+
+
+
+
+
+
+        TransitLine transitLine = scenario.getTransitSchedule().getFactory().createTransitLine(Id.create("S21way2-1", TransitLine.class));
+        NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(
+                getLinkIdFromToNodes("pt_060020201956", "pt_060020201956"),
+                List.of(getLinkIdFromToNodes("pt_060020201956", "pt_060020202811"),
+                        getLinkIdFromToNodes("pt_060020202811", "pt_060001201832"),
+                        getLinkIdFromToNodes("pt_060001201832", "pt_070101004117"),
+                        getLinkIdFromToNodes("pt_070101004117", "pt_060003201214"),
+                        getLinkIdFromToNodes("pt_060003201214", "pt_060100020452"),
+                        getLinkIdFromToNodes("pt_060100020452", "pt_070201012802"),
+                        getLinkIdFromToNodes("pt_070201012802", "pt_060057102802"),
+                        getLinkIdFromToNodes("pt_060057102802", "pt_060057104812"),
+                        getLinkIdFromToNodes("pt_060057104812", "pt_060058100531"),
+                        getLinkIdFromToNodes("pt_060058100531", "pt_060068201512"),
+                        getLinkIdFromToNodes("pt_060068201512", "pt_060079221471"),
+                        getLinkIdFromToNodes("pt_060079221471", "pt_060078201461"),
+                        getLinkIdFromToNodes("pt_060078201461", "pt_060077155441"),
+                        getLinkIdFromToNodes("pt_060077155441", "pt_060191001005"),
+                        getLinkIdFromToNodes("pt_060191001005", "pt_060192001005"),
+                        getLinkIdFromToNodes("pt_060192001005", "pt_060192002001")),
+                getLinkIdFromToNodes("pt_060192002001", "pt_060180003001"));
+
+        List<TransitRouteStop> stops = new ArrayList<>();
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060020201956", "pt_060020201956"),
+                TransitStopFacility.class), 0.0d, 0.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060020201956", "pt_060020202811"),
+                TransitStopFacility.class), 120.0d, 150.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060020202811", "pt_060001201832"),
+                TransitStopFacility.class), 210.0d, 240.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060001201832", "pt_070101004117"),
+                TransitStopFacility.class), 300.0d, 330.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101004117", "pt_060003201214"),
+                TransitStopFacility.class), 450.0d, 480.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060003201214", "pt_060100020452"),
+                TransitStopFacility.class), 660.0d, 690.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060100020452", "pt_070201012802"),
+                TransitStopFacility.class), 750.0d, 780.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070201012802", "pt_060057102802"),
+                TransitStopFacility.class), 840.0d, 870.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060057102802", "pt_060057104812"),
+                TransitStopFacility.class), 930.0d, 960.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060057104812", "pt_060058100531"),
+                TransitStopFacility.class), 1080.0d, 1110.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060058100531", "pt_060068201512"),
+                TransitStopFacility.class), 1230.0d, 1260.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060068201512", "pt_060079221471"),
+                TransitStopFacility.class), 1440.0d, 1470.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060079221471", "pt_060078201461"),
+                TransitStopFacility.class), 1530.0d, 1560.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060078201461", "pt_060077155441"),
+                TransitStopFacility.class), 1680.0d, 1710.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060077155441", "pt_060191001005"),
+                TransitStopFacility.class), 1830.0d, 1860.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060191001005", "pt_060192001005"),
+                TransitStopFacility.class), 2040.0d, 2070.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060192001005", "pt_060192002001"),
+                TransitStopFacility.class), 2250.0d, 2280.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060192002001", "pt_060180003001"),
+                TransitStopFacility.class), 2400.0d, 2430.0d));
+        stops.forEach(stop -> stop.setAwaitDepartureTime(true));
+
+        TransitRoute transitRoute = scenario.getTransitSchedule().getFactory().createTransitRoute(
+                Id.create("S21", TransitRoute.class),
+                networkRoute,
+                stops,
+                "");
+
+        for (int i = 24; i < 155; i++) {
+            Departure departure = scenario.getTransitSchedule().getFactory().createDeparture(Id.create("pt_S21-2--" + i, Departure.class),i*600);
+            scenario.getTransitVehicles().addVehicle(scenario.getTransitVehicles().getFactory().createVehicle(
+                    Id.createVehicleId("pt_S21-2--" + i),
+                    scenario.getTransitVehicles().getVehicleTypes().get(Id.create("S-Bahn_veh_type", VehicleType.class))
+            ));
+            departure.setVehicleId(Id.createVehicleId("pt_S21-2--" + i));
+            transitRoute.addDeparture(departure);
+        }
+
+        for (int i = 170; i < 180; i++) {
+            Departure departure = scenario.getTransitSchedule().getFactory().createDeparture(Id.create("pt_S21-2--" + i, Departure.class),i*600);
+            scenario.getTransitVehicles().addVehicle(scenario.getTransitVehicles().getFactory().createVehicle(
+                    Id.createVehicleId("pt_S21-2--" + i),
+                    scenario.getTransitVehicles().getVehicleTypes().get(Id.create("S-Bahn_veh_type", VehicleType.class))
+            ));
+            departure.setVehicleId(Id.createVehicleId("pt_S21-2--" + i));
+            transitRoute.addDeparture(departure);
+        }
+
+        transitLine.addRoute(transitRoute);
+        scenario.getTransitSchedule().addTransitLine(transitLine);
+    }
+
+    private static void addS21Route4(Scenario scenario) {
+
+        addLinkAndStop(scenario, "pt_070101006802", "pt_070101006802", 1d,5d);
+        addLinkAndStop(scenario, "pt_070101006802", "pt_060192002001", 1680d,14d);
+        addLinkAndStop(scenario, "pt_060192002001", "pt_060192001004", 1960d,10.9d);
+        addLinkAndStop(scenario, "pt_060192001004", "pt_060191001004", 1890d,10.5d);
+        addLinkAndStop(scenario, "pt_060191001004", "pt_060077155442", 1520d,12.7d);
+        addLinkAndStop(scenario, "pt_060077155442", "pt_060078201462", 1700d,14.2d);
+        addLinkAndStop(scenario, "pt_060078201462", "pt_060079221472", 778.6d,13d);
+        addLinkAndStop(scenario, "pt_060079221472", "pt_060068201511",3160d,17.6d);
+        addLinkAndStop(scenario, "pt_060068201511", "pt_060058100532",1400d,11.7d);
+        addLinkAndStop(scenario, "pt_060058100532", "pt_070101000987",959d ,8d);
+        addLinkAndStop(scenario, "pt_070101000987", "pt_070101004006",848.4d ,14.2d);
+        addLinkAndStop(scenario, "pt_070101004006", "pt_070201023501",921d ,15.4d);
+        addLinkAndStop(scenario, "pt_070201023501", "pt_060000100022",1140d ,19d);
+        addLinkAndStop(scenario, "pt_060000100022", "pt_070101021012",1840d ,10.3d);
+        addLinkAndStop(scenario, "pt_070101021012", "pt_070101004117",1430d ,12d);
+        addLinkAndStop(scenario, "pt_070101004117", "pt_060001201831",860d ,14.4d);
+        addLinkAndStop(scenario, "pt_060001201831", "pt_060020202812",1050d ,17.5d);
+        addLinkAndStop(scenario, "pt_060020202812", "pt_060020201955",1950d ,16.3d);
+
+
+
+
+
+
+
+        TransitLine transitLine = scenario.getTransitSchedule().getFactory().createTransitLine(Id.create("S21way2-2", TransitLine.class));
+        NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(
+                getLinkIdFromToNodes("pt_070101006802", "pt_070101006802"),
+                List.of(getLinkIdFromToNodes("pt_070101006802", "pt_060192002001"),
+                        getLinkIdFromToNodes("pt_060192002001", "pt_060192001004"),
+                        getLinkIdFromToNodes("pt_060192001004", "pt_060191001004"),
+                        getLinkIdFromToNodes("pt_060191001004", "pt_060077155442"),
+                        getLinkIdFromToNodes("pt_060077155442", "pt_060078201462"),
+                        getLinkIdFromToNodes("pt_060078201462", "pt_060079221472"),
+                        getLinkIdFromToNodes("pt_060079221472", "pt_060068201511"),
+                        getLinkIdFromToNodes("pt_060068201511", "pt_060058100532"),
+
+                        getLinkIdFromToNodes("pt_060058100532", "pt_070101000987"),
+                        getLinkIdFromToNodes("pt_070101000987", "pt_070101004006"),
+                        getLinkIdFromToNodes("pt_070101004006", "pt_070201023501"),
+                        getLinkIdFromToNodes("pt_070201023501", "pt_060000100022"),
+                        getLinkIdFromToNodes("pt_060000100022", "pt_070101021012"),
+                        getLinkIdFromToNodes("pt_070101021012", "pt_070101004117"),
+                        getLinkIdFromToNodes("pt_070101004117", "pt_060001201831"),
+                        getLinkIdFromToNodes("pt_060001201831", "pt_060020202812")),
+                        getLinkIdFromToNodes("pt_060020202812", "pt_060020201955"));
+
+
+        List<TransitRouteStop> stops = new ArrayList<>();
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101006802", "pt_070101006802"),
+                TransitStopFacility.class), 0.0d, 0.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101006802", "pt_060192002001"),
+                TransitStopFacility.class), 120.0d, 150.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060192002001", "pt_060192001004"),
+                TransitStopFacility.class), 330.0d, 360.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060192001004", "pt_060191001004"),
+                TransitStopFacility.class), 540.0d, 570.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060191001004", "pt_060077155442"),
+                TransitStopFacility.class), 690.0d, 720.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060077155442", "pt_060078201462"),
+                TransitStopFacility.class), 840.0d, 870.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060078201462", "pt_060079221472"),
+                TransitStopFacility.class), 930.0d, 960.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060079221472", "pt_060068201511"),
+                TransitStopFacility.class), 1140.0d, 1170.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060068201511", "pt_060058100532"),
+                TransitStopFacility.class), 1290.0d, 1320.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060058100532", "pt_070101000987"),
+                TransitStopFacility.class), 1440.0d, 1470.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101000987", "pt_070101004006"),
+                TransitStopFacility.class), 1530.0d, 1560.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101004006", "pt_070201023501"),
+                TransitStopFacility.class), 1620.0d, 1650.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070201023501", "pt_060000100022"),
+                TransitStopFacility.class), 1710.0d, 1740.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060000100022", "pt_070101021012"),
+                TransitStopFacility.class), 1920.0d, 1950.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101021012", "pt_070101004117"),
+                TransitStopFacility.class), 1980.0d, 2100.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_070101004117", "pt_060001201831"),
+                TransitStopFacility.class), 2160.0d, 2190.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060001201831", "pt_060020202812"),
+                TransitStopFacility.class), 2250.0d, 2280.0d));
+        stops.add(createTransitRouteStop(scenario, Id.create(getNameFromToNodes("pt_060020202812", "pt_060020201955"),
+                TransitStopFacility.class), 2400.0d, 2430.0d));
+        stops.forEach(stop -> stop.setAwaitDepartureTime(true));
+
+        TransitRoute transitRoute = scenario.getTransitSchedule().getFactory().createTransitRoute(
+                Id.create("S21", TransitRoute.class),
+                networkRoute,
+                stops,
+                "");
+
+        for (int i = 24; i < 155; i++) {
+            Departure departure = scenario.getTransitSchedule().getFactory().createDeparture(Id.create("pt_S21-3--" + i, Departure.class),i*600);
+            scenario.getTransitVehicles().addVehicle(scenario.getTransitVehicles().getFactory().createVehicle(
+                    Id.createVehicleId("pt_S21-3--" + i),
+                    scenario.getTransitVehicles().getVehicleTypes().get(Id.create("S-Bahn_veh_type", VehicleType.class))
+            ));
+            departure.setVehicleId(Id.createVehicleId("pt_S21-3--" + i));
+            transitRoute.addDeparture(departure);
+        }
+
+        for (int i = 170; i < 180; i++) {
+            Departure departure = scenario.getTransitSchedule().getFactory().createDeparture(Id.create("pt_S21-3--" + i, Departure.class),i*600);
+            scenario.getTransitVehicles().addVehicle(scenario.getTransitVehicles().getFactory().createVehicle(
+                    Id.createVehicleId("pt_S21-3--" + i),
+                    scenario.getTransitVehicles().getVehicleTypes().get(Id.create("S-Bahn_veh_type", VehicleType.class))
+            ));
+            departure.setVehicleId(Id.createVehicleId("pt_S21-3--" + i));
+            transitRoute.addDeparture(departure);
+        }
+
+        transitLine.addRoute(transitRoute);
+        scenario.getTransitSchedule().addTransitLine(transitLine);
+    }
+
+
+
+
+    private static TransitRouteStop createTransitRouteStop(Scenario scenario, Id<TransitStopFacility> stop, double arrivalOffset, double departureOffset) {
+        return scenario.getTransitSchedule().getFactory().createTransitRouteStop(
+                scenario.getTransitSchedule().getFacilities().get(stop),
+                arrivalOffset,
+                departureOffset);
+    }
+
+    private static void addForthAndBackLinksAndStops(Scenario scenario, String fromNodeId, String toNodeId, double length, double speed) {
+        addLinkAndStop(scenario, fromNodeId, toNodeId, length, speed);
+        addLinkAndStop(scenario, toNodeId, fromNodeId, length, speed);
+    }
+
+    private static void addLinkAndStop (Scenario scenario, String fromNodeId, String toNodeId, double length, double speed) {
+        Link link = scenario.getNetwork().getFactory().createLink(Id.createLinkId(getNameFromToNodes(fromNodeId, toNodeId)),
+                scenario.getNetwork().getNodes().get(Id.createNodeId(fromNodeId)),
+                scenario.getNetwork().getNodes().get(Id.createNodeId(toNodeId)));
+        link.setLength(length);
+        link.getFreespeed(speed);
+        link.setCapacity(100000.0);
+        link.setAllowedModes(Set.of("S21"));
+        scenario.getNetwork().addLink(link);
+
+        TransitStopFacility transitStopFacility = scenario.getTransitSchedule().getFactory().createTransitStopFacility(
+                Id.create(getNameFromToNodes(fromNodeId, toNodeId), TransitStopFacility.class),
+                scenario.getNetwork().getNodes().get(Id.createNodeId(toNodeId)).getCoord(),
+                false);
+        transitStopFacility.setLinkId(getLinkIdFromToNodes(fromNodeId, toNodeId));
+        scenario.getTransitSchedule().addStopFacility(transitStopFacility);
+    }
+
+    private static String getNameFromToNodes(String fromNodeId, String toNodeId) {
+        return "S21_" + fromNodeId + "-" + toNodeId;
+    }
+
+    private static Id<Link> getLinkIdFromToNodes(String fromNodeId, String toNodeId) {
+        return Id.createLinkId(getNameFromToNodes(fromNodeId, toNodeId));
+    }
+
+}
